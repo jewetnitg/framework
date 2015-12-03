@@ -1,24 +1,29 @@
 import _ from 'lodash';
 
 import implementation from '../singletons/implementation';
-import ensureController from '../helpers/ensureController';
-import ControllerRequest from './ControllerRequest';
-import View from './View';
+import View from 'frontend-view';
 
-import _Router from 'frontend-router';
+import FrontendRouter from 'frontend-router';
 
 /**
  * Please refer to the documentation of the frontend-router module for more information
  *
+ * @class Router
  * @author Rik Hoffbauer
  *
  * @param options {Object} The framework implementation, ie. {config: {...}, api: {...}, ...}
- * @returns {Object} frontend-router instance
+ *
+ * @returns {FrontendRouter} frontend-router instance
+ *
+ * @todo validate properties
  */
 function Router(options = {}) {
-  // @todo validate properties
   const views = {};
   let currentView = null;
+
+  if (options.libraries.riot) {
+    View.riot = options.libraries.riot;
+  }
 
   const opts = _.extend({}, options.config.router, {
     success(route, data) {
@@ -26,9 +31,9 @@ function Router(options = {}) {
         currentView.hide();
       }
 
-      const view = currentView = ensureViewForRoute(views, route);
+      currentView = ensureViewForRoute(views, route);
 
-      view.render(data);
+      currentView.render(data);
       console.log('success', route, data);
     },
     sync(route, data) {
@@ -51,7 +56,7 @@ function Router(options = {}) {
     controllers: options.api.controllers
   });
 
-  return _Router(opts);
+  return FrontendRouter(opts);
 }
 
 function ensureViewForRoute(views, route) {

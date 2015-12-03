@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
 import Model from 'frontend-model';
+import Translator from 'frontend-translator';
 import Controller from './Controller';
 import Service from './Service';
 import Router from './Router';
-import View from './View';
 
 import defaultImplementation from '../constants/defaultImplementation';
 
@@ -41,6 +41,9 @@ function Application(options = {}) {
     },
     communicator: {
       value: constructedImplementation.communicator
+    },
+    translator: {
+      value: constructedImplementation.translator
     },
     options: {
       value: opts
@@ -86,6 +89,22 @@ Application.prototype = {
   },
 
   /**
+   * Executes one or more policies, see the frontend-policies documentation for more info.
+   *
+   * @method policy
+   * @memberof Application
+   * @instance
+   *
+   * @param policies {String|Array<String>} The policies to execute
+   * @param {Object} [data={}] - Data/params for the policy 'request'
+   *
+   * @returns {Promise} A promise that resolves if all policies pass and rejects if one or more don't
+   */
+  policy(policies = [], data = {}) {
+    return this.router.policy(policies, data);
+  },
+
+  /**
    * Gets a translation in the current locale and fills it with data.
    *
    * @method translate
@@ -100,7 +119,7 @@ Application.prototype = {
    * @returns {String} The translation filled with data
    */
   translate(wordPath, data = {}) {
-    throw new Error(`Translate method not implemented`);
+    return this.translator.translate(wordPath, data);
   },
 
   /**
@@ -116,7 +135,7 @@ Application.prototype = {
    *
    */
   setLocale(locale = this.config.app.defaultLocale) {
-    throw new Error(`setLocale method not implemented`);
+    return this.translator.setLocale(locale);
   }
 
 };
@@ -140,6 +159,7 @@ function implement(options = {}) {
 
   implementCommunicator(options, implementation);
   implementModel(options, implementation);
+  implementTranslator(options, implementation);
   implementFramework(options, implementation);
 
   implementation.config = options.config;
@@ -161,6 +181,13 @@ function implementCommunicator(opts, dst) {
 
 function implementModel(opts, dst) {
   factoryRunner(Model, opts.api.models, dst.api.models);
+}
+
+function implementTranslator(opts, dst) {
+  dst.translator = Translator({
+    defaultLocale: opts.config.app.defaultLocale,
+    locales: opts.config.locales
+  });
 }
 
 function implementFramework(opts, dst) {

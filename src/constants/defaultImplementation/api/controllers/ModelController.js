@@ -14,7 +14,7 @@ const ModelController = {
 
     return _model.fetch()
       .then(() => {
-        _model.listenTo(() => {
+        _model.listenTo('change', () => {
           req.sync({
             collection: _model.data
           });
@@ -36,7 +36,7 @@ const ModelController = {
 
     return _model.fetch(id)
       .then((model) => {
-        _model.listenTo(model, () => {
+        _model.listenTo(model, 'change', () => {
           req.sync({
             model: _model.byId[id]
           });
