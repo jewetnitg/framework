@@ -7,7 +7,7 @@ Adding it to a project
 ======================
 
 ```
-npm install frontend-framework --save
+npm install frntnd-framework --save
 ```
 
 Installing

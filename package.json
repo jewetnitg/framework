@@ -1,5 +1,5 @@
 {
-  "name": "frontend-framework",
+  "name": "frntnd-framework",
   "version": "0.0.1-alpha",
   "description": "frontend-framework is a framework built on top of browserify.",
   "main": "index.js",
