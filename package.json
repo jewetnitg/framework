@@ -1,6 +1,6 @@
 {
   "name": "frntnd-framework",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1-alpha2",
   "description": "frontend-framework is a framework built on top of browserify.",
   "main": "index.js",
   "scripts": {
@@ -99,17 +99,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com:jewetnitg/model.git"
+    "url": "git+ssh://git@github.com:jewetnitg/framework.git"
   },
   "keywords": [
-    "model",
+    "framework",
     "request",
     "connection",
     "browserify",
     "es6"
   ],
   "bugs": {
-    "url": "https://github.com/jewetnitg/model/issues"
+    "url": "https://github.com/jewetnitg/framework/issues"
   },
-  "homepage": "https://github.com/jewetnitg/model#readme"
+  "homepage": "https://github.com/jewetnitg/framework#readme"
 }
