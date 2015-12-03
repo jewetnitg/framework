@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import Model from 'frontend-model';
+import View from 'frontend-view';
 import Translator from 'frontend-translator';
 import Controller from './Controller';
 import Service from './Service';
@@ -10,6 +11,8 @@ import defaultImplementation from '../constants/defaultImplementation';
 
 import factoryRunner from '../helpers/factoryRunner';
 import implementation from '../singletons/implementation';
+
+import isMobile from '../constants/isMobile';
 
 // frontend-communicator module, use the one used by the frontend-model module
 // so we a single communicator instead of multiple
@@ -27,6 +30,11 @@ const communicator = Model.communicator;
  */
 function Application(options = {}) {
   const opts = _.merge({}, defaultImplementation, options);
+
+  if (options.libraries.riot) {
+    View.riot = options.libraries.riot;
+  }
+
   const constructedImplementation = implement(opts);
 
   const props = {
@@ -154,12 +162,14 @@ function startApplication(app) {
 
 // @todo construct static views
 function implement(options = {}) {
-
+  applyDevice(options);
   applyEnv(options);
 
   implementCommunicator(options, implementation);
   implementModel(options, implementation);
   implementTranslator(options, implementation);
+  implementStaticViews(options, implementation);
+  implementRouter(options, implementation);
   implementFramework(options, implementation);
 
   implementation.config = options.config;
@@ -190,9 +200,26 @@ function implementTranslator(opts, dst) {
   });
 }
 
-function implementFramework(opts, dst) {
+function implementStaticViews(opts, dst) {
+  factoryRunner(View, opts.api.staticViews, {}, {
+    static: true
+  });
+
+  dst.api.staticViews = View.staticViews;
+}
+
+function implementRouter(opts, dst) {
   factoryRunner(Controller, opts.api.controllers, dst.api.controllers);
+}
+
+function implementFramework(opts, dst) {
   factoryRunner(Service, opts.api.services, dst.api.services);
+}
+
+function applyDevice(options) {
+  if (isMobile) {
+    _.merge(options, options.config.mobile || {});
+  }
 }
 
 function applyEnv(options) {

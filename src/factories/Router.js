@@ -16,14 +16,11 @@ import FrontendRouter from 'frontend-router';
  * @returns {FrontendRouter} frontend-router instance
  *
  * @todo validate properties
+ * @todo call staticViews
  */
 function Router(options = {}) {
   const views = {};
   let currentView = null;
-
-  if (options.libraries.riot) {
-    View.riot = options.libraries.riot;
-  }
 
   const opts = _.extend({}, options.config.router, {
     success(route, data) {
@@ -53,7 +50,7 @@ function Router(options = {}) {
     },
     routes: options.config.routes,
     policies: options.api.policies,
-    controllers: options.api.controllers
+    controllers: implementation.api.controllers
   });
 
   return FrontendRouter(opts);

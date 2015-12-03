@@ -1,13 +1,13 @@
-Model
+Framework
 ============================
 
-This npm module serves to make working with models easier.
+This module glues all the frontend modules together to form a framework.
 
 Adding it to a project
 ======================
 
 ```
-npm install frontend-model --save
+npm install frontend-framework --save
 ```
 
 Installing
