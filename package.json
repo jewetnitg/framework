@@ -27,6 +27,7 @@
   },
   "eslintConfig": {},
   "dependencies": {
+    "babel-polyfill": "^6.3.14",
     "frontend-model": "file:modules/frontend-model",
     "frontend-router": "file:modules/frontend-router",
     "frontend-translator": "file:modules/frontend-translator",
