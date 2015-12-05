@@ -69,8 +69,23 @@ function ensureViewForRoute(views, route) {
   const viewName = route.view;
 
   if (!views[viewName]) {
-    implementation.api.views[viewName].name = implementation.api.views[viewName].name || viewName;
-    views[viewName] = View(implementation.api.views[viewName]);
+    const viewOptions = implementation.api.views[viewName];
+
+    if (window._preRendered) {
+      let el = null;
+
+      if (viewOptions.$holder) {
+        el = viewOptions.$holder[0];
+      } else {
+        el = $(`${viewOptions.holder} > ${this.tag}`);
+      }
+
+      viewOptions.el = el;
+    }
+
+    viewOptions.name = viewOptions.name || viewName;
+
+    views[viewName] = View(viewOptions);
   }
 
   return views[viewName];
