@@ -1,6 +1,6 @@
 [submodule "modules/frontend-model"]
 	path = modules/frontend-model
-	url = /Users/rik/Repositories/frontend-model.git
+url=https://github.com/jewetnitg/model.git
 [submodule "modules/frontend-router"]
 	path = modules/frontend-router
 	url = /Users/rik/Repositories/frontend-router.git
