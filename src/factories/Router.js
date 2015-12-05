@@ -77,7 +77,7 @@ function ensureViewForRoute(views, route) {
       if (viewOptions.$holder) {
         el = viewOptions.$holder[0];
       } else {
-        el = $(`${viewOptions.holder} > ${this.tag}`);
+        el = $(`${viewOptions.holder} > ${viewOptions.tag}`);
       }
 
       viewOptions.el = el;
