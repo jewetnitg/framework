@@ -1,0 +1,3 @@
+[submodule "modules/frontend-model"]
+	path = modules/frontend-model
+	url = /Users/rik/Repositories/frontend-model.git
