@@ -29,7 +29,7 @@
   "dependencies": {
     "frontend-model": "^0.0.4",
     "frontend-router": "^0.0.2",
-    "frontend-translator": "^0.0.1",
+    "frontend-translator": "^0.0.3",
     "frontend-view": "^0.0.2",
     "jquery": "2.1.4",
     "lodash": "^3.10.1",

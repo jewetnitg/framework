@@ -7,7 +7,8 @@ import Controller from './Controller';
 import Service from './Service';
 import Router from './Router';
 
-import defaultImplementation from '../constants/defaultImplementation';
+import defaultImplementation from '../constants/defaultImplementation/index';
+import session from '../constants/session';
 
 import factoryRunner from '../helpers/factoryRunner';
 import implementation from '../singletons/implementation';
@@ -38,6 +39,9 @@ function Application(options = {}) {
   const constructedImplementation = implement(opts);
 
   const props = {
+    session: {
+      value: session
+    },
     api: {
       value: constructedImplementation.api
     },
@@ -160,7 +164,6 @@ function startApplication(app) {
     });
 }
 
-// @todo construct static views
 function implement(options = {}) {
   applyDevice(options);
   applyEnv(options);

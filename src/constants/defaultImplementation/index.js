@@ -3,7 +3,7 @@
  */
 import _ from 'lodash';
 
-const files = require('./**/!(defaultImplementation|isMobile).js', {
+const files = require('./**/!(index).js', {
   mode: 'hash'
 });
 

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import implementation from '../singletons/implementation';
+import session from '../constants/session';
 import View from 'frontend-view';
 
 import FrontendRouter from 'frontend-router';
@@ -21,6 +22,9 @@ import FrontendRouter from 'frontend-router';
 function Router(options = {}) {
   const views = {};
   let currentView = null;
+
+  //noinspection JSPotentiallyInvalidConstructorUsage
+  FrontendRouter.policyExecutor.requestFactory.prototype.session = session;
 
   const opts = _.extend({}, options.config.router, {
     success(route, data) {
@@ -52,6 +56,7 @@ function Router(options = {}) {
     policies: options.api.policies,
     controllers: implementation.api.controllers
   });
+
 
   return FrontendRouter(opts);
 }
