@@ -6,7 +6,7 @@ url=https://github.com/jewetnitg/model.git
 	url = /Users/rik/Repositories/frontend-router.git
 [submodule "modules/frontend-translator"]
 	path = modules/frontend-translator
-	url = /Users/rik/Repositories/frontend-translator.git
+url=https://github.com/jewetnitg/translator.git
 [submodule "modules/frontend-view"]
 	path = modules/frontend-view
 	url = /Users/rik/Repositories/frontend-view.git
