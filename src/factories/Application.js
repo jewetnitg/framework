@@ -12,12 +12,9 @@ import session from '../constants/session';
 
 import factoryRunner from '../helpers/factoryRunner';
 import implementation from '../singletons/implementation';
+import communicator from '../singletons/communicator';
 
 import isMobile from '../constants/isMobile';
-
-// frontend-communicator module, use the one used by the frontend-model module
-// so we a single communicator instead of multiple
-const communicator = Model.communicator;
 
 /**
  * @class Application
@@ -188,6 +185,7 @@ function implementCommunicator(opts, dst) {
   communicator.defaultConnection = opts.config.app.defaultConnection;
 
   factoryRunner(communicator.Request, opts.api.requests, dst.api.requests);
+  communicator.policyExecutor.add(opts.api.policies);
 
   dst.communicator = communicator;
 }

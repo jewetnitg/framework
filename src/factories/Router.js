@@ -1,6 +1,8 @@
 import _ from 'lodash';
 
 import implementation from '../singletons/implementation';
+import communicator from '../singletons/communicator';
+
 import session from '../constants/session';
 import View from 'frontend-view';
 
@@ -23,6 +25,7 @@ function Router(options = {}) {
   const views = {};
   let currentView = null;
 
+  FrontendRouter.policyExecutor = communicator.policyExecutor;
   //noinspection JSPotentiallyInvalidConstructorUsage
   FrontendRouter.policyExecutor.requestFactory.prototype.session = session;
 
@@ -53,7 +56,8 @@ function Router(options = {}) {
       }
     },
     routes: options.config.routes,
-    policies: options.api.policies,
+    // dont specify policies, they are already registered by setting FrontendRouter.policyExecutor
+    policies: {},
     controllers: implementation.api.controllers
   });
 
