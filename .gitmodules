@@ -9,4 +9,4 @@ url=https://github.com/jewetnitg/model.git
 url=https://github.com/jewetnitg/translator.git
 [submodule "modules/frontend-view"]
 	path = modules/frontend-view
-	url = /Users/rik/Repositories/frontend-view.git
+url=https://github.com/jewetnitg/view.git
