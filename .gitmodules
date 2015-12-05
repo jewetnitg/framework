@@ -1,12 +1,16 @@
 [submodule "modules/frontend-model"]
 	path = modules/frontend-model
-url=https://github.com/jewetnitg/model.git
+	branch = master
+	url=https://github.com/jewetnitg/model.git
 [submodule "modules/frontend-router"]
 	path = modules/frontend-router
-url=https://github.com/jewetnitg/router.git
+	branch = master
+	url=https://github.com/jewetnitg/router.git
 [submodule "modules/frontend-translator"]
 	path = modules/frontend-translator
-url=https://github.com/jewetnitg/translator.git
+	branch = master
+	url=https://github.com/jewetnitg/translator.git
 [submodule "modules/frontend-view"]
 	path = modules/frontend-view
-url=https://github.com/jewetnitg/view.git
+	branch = master
+	url=https://github.com/jewetnitg/view.git
