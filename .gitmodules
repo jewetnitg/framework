@@ -3,7 +3,7 @@
 	url = /Users/rik/Repositories/frontend-model.git
 [submodule "modules/frontend-router"]
 	path = modules/frontend-router
-	url = /Users/rik/Repositories/frontend-router.git
+	url = /Users/rik/Repositories/monorepo/frontend/modules/frntnd-framework/modules/frontend-router
 [submodule "modules/frontend-translator"]
 	path = modules/frontend-translator
 	url = /Users/rik/Repositories/frontend-translator.git
