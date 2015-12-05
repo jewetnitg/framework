@@ -3,7 +3,7 @@
 url=https://github.com/jewetnitg/model.git
 [submodule "modules/frontend-router"]
 	path = modules/frontend-router
-	url = /Users/rik/Repositories/frontend-router.git
+url=https://github.com/jewetnitg/router.git
 [submodule "modules/frontend-translator"]
 	path = modules/frontend-translator
 url=https://github.com/jewetnitg/translator.git
