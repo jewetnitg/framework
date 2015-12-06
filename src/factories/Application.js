@@ -1,21 +1,16 @@
 import _ from 'lodash';
 import events from 'events';
 
-import Model from 'frontend-model';
 import View from 'frontend-view';
-import Translator from 'frontend-translator';
-import Controller from './Controller';
-import Service from './Service';
 import Router from './Router';
 
-import defaultImplementation from '../constants/defaultImplementation/index';
 import session from '../constants/session';
+import eventsMixin from '../mixins/eventsMixin';
 
-import factoryRunner from '../helpers/factoryRunner';
+import implement from '../helpers/implement';
+import passHtmlToPhantomJs from '../helpers/passHtmlToPhantomJs';
+
 import implementation from '../singletons/implementation';
-import communicator from '../singletons/communicator';
-
-import isMobile from '../constants/isMobile';
 
 /**
  * @class Application
@@ -28,31 +23,17 @@ import isMobile from '../constants/isMobile';
  * @property env {String} String representing the runtime environment
  */
 function Application(options = {}) {
-  const opts = _.merge({}, defaultImplementation, options);
-
-  const emitter = new events.EventEmitter();
-
-  if (options.libraries.riot) {
-    View.riot = options.libraries.riot;
-  }
-
-  // @todo, either remove (most) of these or make them writable
   const props = {
     session: {
       value: session
-    },
-    emitter: {
-      value: emitter
-    },
-    ready: {
-      writable: true,
-      value: false
     }
   };
 
   const app = window.app = Object.create(Application.prototype, props);
 
-  startApplication(app, opts);
+  _.extend(app, eventsMixin());
+
+  startApplication(app, options);
 
   return app;
 }
@@ -140,47 +121,17 @@ Application.prototype = {
    */
   setLocale(locale = this.config.app.defaultLocale) {
     return this.translator.setLocale(locale);
-  },
-
-  // @todo refactor event methods to mixin function
-  on(event, callback) {
-    this.emitter.on(event, callback);
-  },
-
-  once(event, callback) {
-    const self = this;
-
-    function cb(data) {
-      self.off(event, cb);
-      callback(data);
-    }
-
-    self.on(event, cb);
-  },
-
-  trigger(event, data) {
-    this.emitter.emit(event, data);
-  },
-
-  off(event, callback) {
-    if (callback) {
-      this.emitter.removeListener(event, callback);
-    } else {
-      this.emitter.removeAllListeners(event);
-    }
   }
 
 };
 
 function startApplication(app, options) {
-  return getOptionsFromServer(options)
-    .then((serverData = {}) => {
-      _.merge(options, serverData);
-      _.extend(app, implement(options));
-
+  return implement(options)
+    .then((options) => {
+      _.extend(app, options);
       app.options = options;
+      return app.connect();
     })
-    .then(app.connect.bind(app))
     .then((connection) => {
       app.connection = connection;
       return app.config.bootstrap();
@@ -188,107 +139,8 @@ function startApplication(app, options) {
     .then(() => {
       app.router = implementation.router = Router(app.options);
       app.trigger('ready');
-      app.ready = true;
-
-      // for render server
-      if (window.callPhantom) {
-        const html = document.querySelector('html').outerHTML
-          .replace(/<\/body>/gi, `<script>window._preRendered = true;</script></body>`);
-
-        window.callPhantom(html);
-        // @todo see if we can leave this out, callPhantom might always be defined
-      } else if (window._onAppReady) {
-        window._onAppReady();
-      }
+      passHtmlToPhantomJs();
     });
-}
-
-function implement(options = {}) {
-  applyDevice(options);
-  applyEnv(options);
-
-  implementCommunicator(options, implementation);
-  implementModel(options, implementation);
-  implementTranslator(options, implementation);
-  implementStaticViews(options, implementation);
-  implementRouter(options, implementation);
-  implementFramework(options, implementation);
-
-  implementation.config = options.config;
-  implementation.api.views = options.api.views;
-
-  return implementation;
-}
-
-
-function implementCommunicator(opts, dst) {
-  factoryRunner(communicator.Adapter, opts.components.adapters, dst.components.adapters);
-  factoryRunner(communicator.Connection, opts.config.connections, dst.config.connections);
-  communicator.defaultConnection = opts.config.app.defaultConnection;
-
-  factoryRunner(communicator.Request, opts.api.requests, dst.api.requests);
-  communicator.policyExecutor.add(opts.api.policies);
-
-  dst.communicator = communicator;
-}
-
-function implementModel(opts, dst) {
-  factoryRunner(Model, opts.api.models, dst.api.models, {
-    connection: opts.config.models.connection || opts.config.app.defaultConnection
-  });
-}
-
-function implementTranslator(opts, dst) {
-  dst.translator = Translator({
-    defaultLocale: opts.config.app.defaultLocale,
-    locales: opts.config.locales
-  });
-}
-
-function implementStaticViews(opts, dst) {
-  factoryRunner(View, opts.api.staticViews, {}, {
-    static: true
-  });
-
-  dst.api.staticViews = View.staticViews;
-}
-
-function implementRouter(opts, dst) {
-  factoryRunner(Controller, opts.api.controllers, dst.api.controllers);
-}
-
-function implementFramework(opts, dst) {
-  factoryRunner(Service, opts.api.services, dst.api.services);
-}
-
-function applyDevice(options) {
-  if (isMobile) {
-    _.merge(options, options.config.mobile || {});
-  }
-}
-
-function applyEnv(options) {
-  if (options.env) {
-    const env = options.config.env[options.env];
-
-    if (env) {
-      _.merge(options, env);
-    }
-  }
-}
-
-function getOptionsFromServer(options) {
-  if (options.config.app.descriptorUrl) {
-    return new Promise(resolve => {
-      $.get(options.config.app.descriptorUrl)
-        .done(resolve)
-        .fail(() => {
-          resolve()
-        });
-    });
-  } else {
-    return Promise.resolve();
-  }
 }
 
 export default Application;

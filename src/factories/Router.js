@@ -78,6 +78,7 @@ function ensureViewForRoute(views, route) {
   if (!views[viewName]) {
     const viewOptions = implementation.api.views[viewName];
 
+    // for render server, if this is true, the rendered element is already on the page
     if (window._preRendered) {
       let el = null;
 
