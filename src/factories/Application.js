@@ -233,7 +233,9 @@ function implementCommunicator(opts, dst) {
 }
 
 function implementModel(opts, dst) {
-  factoryRunner(Model, opts.api.models, dst.api.models);
+  factoryRunner(Model, opts.api.models, dst.api.models, {
+    connection: opts.config.models.connection || opts.config.app.defaultConnection
+  });
 }
 
 function implementTranslator(opts, dst) {

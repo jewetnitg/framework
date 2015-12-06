@@ -3,12 +3,12 @@
  */
 import _ from 'lodash';
 
-function factoryRunner(factory, src, dst = src, extendObj) {
+function factoryRunner(factory, src, dst = src, defaultsObj) {
   _.each(src, (obj, name) => {
     obj.name = obj.name || name;
 
-    if (extendObj) {
-      _.extend(obj, extendObj);
+    if (defaultsObj) {
+      _.defaults(obj, defaultsObj);
     }
 
     dst[obj.name] = factory(obj);
