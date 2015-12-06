@@ -31,14 +31,21 @@ function Router(options = {}) {
 
   const opts = _.extend({}, options.config.router, {
     success(route, data) {
-      if (currentView) {
-        currentView.hide();
-      }
-
-      currentView = ensureViewForRoute(views, route);
-
-      currentView.render(data);
       console.log('success', route, data);
+
+      // for render-server
+      if (window._onRouterReady) {
+        window._onRouterReady();
+        delete window._onRouterReady;
+      } else {
+        if (currentView) {
+          currentView.hide();
+        }
+
+        currentView = ensureViewForRoute(views, route);
+
+        currentView.render(data);
+      }
     },
     sync(route, data) {
       const view = ensureViewForRoute(views, route);

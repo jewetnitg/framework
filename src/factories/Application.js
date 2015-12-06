@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import events from 'events';
 
 import Model from 'frontend-model';
 import View from 'frontend-view';
@@ -29,6 +30,8 @@ import isMobile from '../constants/isMobile';
 function Application(options = {}) {
   const opts = _.merge({}, defaultImplementation, options);
 
+  const emitter = new events.EventEmitter();
+
   if (options.libraries.riot) {
     View.riot = options.libraries.riot;
   }
@@ -56,6 +59,13 @@ function Application(options = {}) {
     },
     options: {
       value: opts
+    },
+    emitter: {
+      value: emitter
+    },
+    ready: {
+      writable: true,
+      value: false
     }
   };
 
@@ -145,6 +155,34 @@ Application.prototype = {
    */
   setLocale(locale = this.config.app.defaultLocale) {
     return this.translator.setLocale(locale);
+  },
+
+  // @todo refactor event methods to mixin function
+  on(event, callback) {
+    this.emitter.on(event, callback);
+  },
+
+  once(event, callback) {
+    const self = this;
+
+    function cb(data) {
+      self.off(event, cb);
+      callback(data);
+    }
+
+    self.on(event, cb);
+  },
+
+  trigger(event, data) {
+    this.emitter.emit(event, data);
+  },
+
+  off(event, callback) {
+    if (callback) {
+      this.emitter.removeListener(event, callback);
+    } else {
+      this.emitter.removeAllListeners(event);
+    }
   }
 
 };
@@ -158,6 +196,18 @@ function startApplication(app) {
     .then(app.config.bootstrap)
     .then(() => {
       app.router = implementation.router = Router(app.options);
+      app.trigger('ready');
+      app.ready = true;
+
+      // for render server
+      if (window.callPhantom) {
+        const html = document.querySelector('html').outerHTML
+          .replace(/<\/body>/gi, `<script>window._preRendered = true;</script></body>`);
+
+        window.callPhantom(html);
+      } else if (window._onAppReady) {
+        window._onAppReady();
+      }
     });
 }
 
