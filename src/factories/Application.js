@@ -36,29 +36,10 @@ function Application(options = {}) {
     View.riot = options.libraries.riot;
   }
 
-  const constructedImplementation = implement(opts);
-
+  // @todo, either remove (most) of these or make them writable
   const props = {
     session: {
       value: session
-    },
-    api: {
-      value: constructedImplementation.api
-    },
-    models: {
-      value: constructedImplementation.api.models
-    },
-    config: {
-      value: constructedImplementation.config
-    },
-    communicator: {
-      value: constructedImplementation.communicator
-    },
-    translator: {
-      value: constructedImplementation.translator
-    },
-    options: {
-      value: opts
     },
     emitter: {
       value: emitter
@@ -71,13 +52,17 @@ function Application(options = {}) {
 
   const app = window.app = Object.create(Application.prototype, props);
 
-  startApplication(app);
+  startApplication(app, opts);
 
   return app;
 }
 
 Application.prototype = {
 
+
+  get models() {
+    return this.api && this.api.models;
+  },
   /**
    * The server property of the default connection. Please refer to the frontend-communicator module for more information.
    *
@@ -187,13 +172,19 @@ Application.prototype = {
 
 };
 
-function startApplication(app) {
-  return app.connect()
+function startApplication(app, options) {
+  return getOptionsFromServer(options)
+    .then((serverData = {}) => {
+      _.merge(options, serverData);
+      _.extend(app, implement(options));
+
+      app.options = options;
+    })
+    .then(app.connect.bind(app))
     .then((connection) => {
       app.connection = connection;
-      return Promise.resolve();
+      return app.config.bootstrap();
     })
-    .then(app.config.bootstrap)
     .then(() => {
       app.router = implementation.router = Router(app.options);
       app.trigger('ready');
@@ -205,6 +196,7 @@ function startApplication(app) {
           .replace(/<\/body>/gi, `<script>window._preRendered = true;</script></body>`);
 
         window.callPhantom(html);
+        // @todo see if we can leave this out, callPhantom might always be defined
       } else if (window._onAppReady) {
         window._onAppReady();
       }
@@ -280,6 +272,20 @@ function applyEnv(options) {
     if (env) {
       _.merge(options, env);
     }
+  }
+}
+
+function getOptionsFromServer(options) {
+  if (options.config.app.descriptorUrl) {
+    return new Promise(resolve => {
+      $.get(options.config.app.descriptorUrl)
+        .done(resolve)
+        .fail(() => {
+          resolve()
+        });
+    });
+  } else {
+    return Promise.resolve();
   }
 }
 
