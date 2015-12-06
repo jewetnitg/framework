@@ -8,7 +8,6 @@ import session from '../constants/session';
 import eventsMixin from '../mixins/eventsMixin';
 
 import implement from '../helpers/implement';
-import passHtmlToPhantomJs from '../helpers/passHtmlToPhantomJs';
 
 import implementation from '../constants/implementation';
 
@@ -139,7 +138,11 @@ function startApplication(app, options) {
     .then(() => {
       app.router = implementation.router = Router(app.options);
       app.trigger('ready');
-      passHtmlToPhantomJs();
+
+      if (window._onAppReady) {
+        window._onAppReady();
+        delete window._onAppReady;
+      }
     });
 }
 

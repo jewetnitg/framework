@@ -42,7 +42,7 @@ function implement(options = {}) {
       });
 
       communicator.defaultConnection = implementation.config.app.defaultConnection;
-      communicator.policyExecutor.add(implementation.api.policies);
+      communicator.policyExecutor.add(opts.api.policies);
       implementation.communicator = communicator;
 
       // factories for all components of the implementation

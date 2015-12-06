@@ -34,18 +34,17 @@ function Router(options = {}) {
       console.log('success', route, data);
 
       // for render-server
-      // @todo see if we need this, maybe we can combine _onAppReady and _onRouterReady and just use window.callPhantom
+      if (currentView) {
+        currentView.hide();
+      }
+
+      currentView = ensureViewForRoute(views, route);
+
+      currentView.render(data);
+
       if (window._onRouterReady) {
         window._onRouterReady();
         delete window._onRouterReady;
-      } else {
-        if (currentView) {
-          currentView.hide();
-        }
-
-        currentView = ensureViewForRoute(views, route);
-
-        currentView.render(data);
       }
     },
     sync(route, data) {
