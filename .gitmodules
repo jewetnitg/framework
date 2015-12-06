@@ -14,3 +14,7 @@
 	path = modules/frontend-view
 	branch = master
 	url=https://github.com/jewetnitg/view.git
+[submodule "modules/generator-frontend-framework"]
+	path = modules/generator-frontend-framework
+  branch = master
+	url = https://github.com/jewetnitg/generator-frontend-framework.git
