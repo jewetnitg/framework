@@ -8,6 +8,8 @@ function passHtmlToPhantomJs() {
       .replace(/<\/body>/gi, `<script>window._preRendered = true;</script></body>`);
 
     window.callPhantom(html);
+  } else if (window._onAppReady) {
+    window._onAppReady();
   }
 }
 

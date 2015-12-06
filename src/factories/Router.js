@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import implementation from '../singletons/implementation';
+import implementation from '../constants/implementation';
 import communicator from '../singletons/communicator';
 
 import session from '../constants/session';
@@ -34,6 +34,7 @@ function Router(options = {}) {
       console.log('success', route, data);
 
       // for render-server
+      // @todo see if we need this, maybe we can combine _onAppReady and _onRouterReady and just use window.callPhantom
       if (window._onRouterReady) {
         window._onRouterReady();
         delete window._onRouterReady;

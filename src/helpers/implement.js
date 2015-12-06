@@ -17,7 +17,7 @@ import isMobile from '../constants/isMobile';
 
 // constants
 import defaultImplementation from '../constants/defaultImplementation/index';
-import implementation from '../singletons/implementation';
+import implementation from '../constants/implementation';
 
 function implement(options = {}) {
   return getOptionsFromServer(options)

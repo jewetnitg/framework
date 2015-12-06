@@ -42,11 +42,13 @@ Controller.prototype = {
     if (this.collection) {
       return this.collection.fetch()
         .then(() => {
-          this.collection.listenTo('change', () => {
+          const listener = this.collection.listenTo('change', () => {
             req.sync({
               collection: this.collection.data
             });
           });
+
+          req.destruct = listener.stop.bind(listener);
 
           return {
             collection: this.collection.data
@@ -71,9 +73,11 @@ Controller.prototype = {
 
       return this.collection.fetch(id)
         .then((model) => {
-          this.collection.listenTo(model, 'change', () => {
+          const listener = this.collection.listenTo(model, 'change', () => {
             req.sync(model);
           });
+
+          req.destruct = listener.stop.bind(listener);
 
           return {
             model

@@ -10,7 +10,7 @@ import eventsMixin from '../mixins/eventsMixin';
 import implement from '../helpers/implement';
 import passHtmlToPhantomJs from '../helpers/passHtmlToPhantomJs';
 
-import implementation from '../singletons/implementation';
+import implementation from '../constants/implementation';
 
 /**
  * @class Application
