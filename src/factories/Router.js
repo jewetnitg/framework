@@ -9,68 +9,66 @@ import View from 'frontend-view';
 import FrontendRouter from 'frontend-router';
 
 /**
- * Please refer to the documentation of the frontend-router module for more information
+ * Creates a frontend-router
  *
  * @class Router
  * @author Rik Hoffbauer
- *
- * @param options {Object} The framework implementation, ie. {config: {...}, api: {...}, ...}
  *
  * @returns {FrontendRouter} frontend-router instance
  *
  * @todo validate properties
  * @todo call staticViews
  */
-function Router(options = {}) {
-  const views = {};
-  let currentView = null;
-
+function Router() {
   FrontendRouter.policyExecutor = communicator.policyExecutor;
   //noinspection JSPotentiallyInvalidConstructorUsage
   FrontendRouter.policyExecutor.requestFactory.prototype.session = session;
 
-  const opts = _.extend({}, options.config.router, {
-    success(route, data) {
-      console.log('success', route, data);
-
-      // for render-server
-      if (currentView) {
-        currentView.hide();
-      }
-
-      currentView = ensureViewForRoute(views, route);
-
-      currentView.render(data);
-
-      if (window._onRouterReady) {
-        window._onRouterReady();
-        delete window._onRouterReady;
-      }
-    },
-    sync(route, data) {
-      const view = ensureViewForRoute(views, route);
-      view.sync(data);
-      console.log('sync', route, data);
-    },
-    fail(route, data) {
-      switch (data.reason) {
-        case 'policy':
-          console.log('policies failed for route', route, data);
-          break;
-        case 'controller':
-          console.log('controller failed for route', route, data);
-          break;
-      }
-    },
-    routes: options.config.routes,
-    // dont specify policies, they are already registered by setting FrontendRouter.policyExecutor
+  const opts = _.extend({
+    views: {},
     policies: {},
-    controllers: implementation.api.controllers
-  });
-
+    routes: implementation.config.routes,
+    controllers: implementation.api.controllers,
+  }, implementation.config.router, Router.prototype);
 
   return FrontendRouter(opts);
 }
+
+Router.prototype = {
+
+  success(route, data) {
+    // for render-server
+    if (this.currentView) {
+      this.currentView.hide();
+    }
+
+    this.currentView = ensureViewForRoute(this.options.views, route);
+    this.currentView.render(data);
+
+    // for render server
+    if (window._onRouterReady) {
+      window._onRouterReady();
+      delete window._onRouterReady;
+    }
+  },
+
+  sync(route, data) {
+    const view = ensureViewForRoute(this.options.views, route);
+    view.sync(data);
+  },
+
+  fail(route, data) {
+    switch (data.reason) {
+      case 'policy':
+        console.log('policies failed for route', route, data);
+        break;
+      case 'controller':
+        console.log('controller failed for route', route, data);
+        break;
+    }
+  }
+
+};
 
 function ensureViewForRoute(views, route) {
   const viewName = route.view;
@@ -80,15 +78,9 @@ function ensureViewForRoute(views, route) {
 
     // for render server, if this is true, the rendered element is already on the page
     if (window._preRendered) {
-      let el = null;
-
-      if (viewOptions.$holder) {
-        el = viewOptions.$holder[0];
-      } else {
-        el = $(`${viewOptions.holder} > ${viewOptions.tag}`);
-      }
-
-      viewOptions.el = el;
+      viewOptions.el = viewOptions.$holder
+        ? $(`> ${viewOptions.tag}`, viewOptions.$holder)[0]
+        : $(`${viewOptions.holder} > ${viewOptions.tag}`)[0];
     }
 
     viewOptions.name = viewOptions.name || viewName;
