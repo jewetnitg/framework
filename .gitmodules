@@ -14,7 +14,3 @@
 	path = modules/frontend-view
 	branch = master
 	url=https://github.com/jewetnitg/view.git
-[submodule "modules/frontend-cli"]
-	path = modules/frontend-cli
-	url = https://github.com/jewetnitg/frontend-cli
-	branch = master
