@@ -1,9 +1,10 @@
 {
   "name": "frntnd-framework",
-  "version": "0.0.1-alpha5",
+  "version": "0.0.2",
   "description": "frontend-framework is a framework built on top of browserify.",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npm --prefix modules/frontend-model i && npm --prefix modules/frontend-view i && npm --prefix modules/frontend-router i && npm --prefix modules/frontend-translator i",
     "build": "gulp build",
     "dev": "gulp dev",
     "test": "gulp test",
@@ -26,6 +27,12 @@
     ]
   },
   "eslintConfig": {},
+  "bundledDependencies": [
+    "frontend-model",
+    "frontend-router",
+    "frontend-translator",
+    "frontend-view"
+  ],
   "dependencies": {
     "babel-polyfill": "^6.3.14",
     "frontend-model": "file:./modules/frontend-model",
