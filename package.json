@@ -1,6 +1,6 @@
 {
   "name": "frntnd-framework",
-  "version": "0.0.1-alpha4",
+  "version": "0.0.1-alpha5",
   "description": "frontend-framework is a framework built on top of browserify.",
   "main": "index.js",
   "scripts": {
