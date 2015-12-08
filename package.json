@@ -1,6 +1,6 @@
 {
   "name": "frntnd-framework",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "frontend-framework is a framework built on top of browserify.",
   "main": "index.js",
   "scripts": {
@@ -26,12 +26,6 @@
     ]
   },
   "eslintConfig": {},
-  "bundledDependencies": [
-    "frontend-model",
-    "frontend-router",
-    "frontend-translator",
-    "frontend-view"
-  ],
   "dependencies": {
     "babel-polyfill": "^6.3.14",
     "frontend-model": "^0.0.7",
