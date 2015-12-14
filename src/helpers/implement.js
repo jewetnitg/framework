@@ -5,6 +5,7 @@ import _ from 'lodash';
 import Model from 'frontend-model';
 import View from 'frontend-view';
 import Translator from 'frontend-translator';
+
 import Controller from '../factories/Controller';
 import Service from '../factories/Service';
 import Router from '../factories/Router';
@@ -28,8 +29,14 @@ function implement(options = {}) {
       applyEnv(opts);
 
       if (opts.libraries.riot) {
-        View.riot = opts.libraries.riot;
+        View.adapters.riot.riot = opts.libraries.riot;
       }
+
+      mergeImplementations(opts.api.routes, opts.config.routes, 'route');
+      delete opts.api.routes;
+
+      mergeImplementations(opts.api.connections, opts.config.connections);
+      delete opts.api.connections;
 
       implementation.config = opts.config;
 
@@ -72,20 +79,21 @@ function implement(options = {}) {
             connection: implementation.config.models.connection || implementation.config.app.defaultConnection
           }
         },
-        // frontend-view
-        {
-          factory: View,
-          src: opts.api.staticViews,
-          dst: {},
-          override: {
-            static: true
-          }
-        },
         // frontend-router
         {
           factory: Controller,
           src: opts.api.controllers,
           dst: implementation.api.controllers
+        },
+        // frontend-view
+        {
+          factory: View,
+          src: opts.api.staticViews,
+          dst: {},
+          defaults: opts.config.staticViews,
+          override: {
+            static: true
+          }
         },
         // frntnd-framework
         {
@@ -99,6 +107,21 @@ function implement(options = {}) {
 
       return implementation;
     });
+}
+
+function mergeImplementations(src, dst, identifierAttribute = "name", overrideIdentity = false) {
+  const mergeObj = {};
+  _.each(src, (obj, identity) => {
+    var _identity = obj[identifierAttribute];
+
+    if (overrideIdentity) {
+      _identity = identity;
+    }
+
+    dst[_identity] = obj;
+  });
+
+  _.merge(dst, mergeObj);
 }
 
 // applies device specific implementation

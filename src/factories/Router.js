@@ -28,7 +28,7 @@ function Router() {
     views: {},
     policies: {},
     routes: implementation.config.routes,
-    controllers: implementation.api.controllers,
+    controllers: implementation.api.controllers
   }, implementation.config.router, Router.prototype);
 
   return FrontendRouter(opts);
@@ -44,6 +44,8 @@ Router.prototype = {
 
     this.currentView = ensureViewForRoute(this.options.views, route);
     this.currentView.render(data);
+
+    renderStaticViews(route.staticViews, data);
 
     // for render server
     if (window._onRouterReady) {
@@ -70,6 +72,16 @@ Router.prototype = {
 
 };
 
+function renderStaticViews(staticViews, data = {}) {
+  _.each(View.staticViews, (view, name) => {
+    if (staticViews && staticViews.indexOf(name) !== -1) {
+      view.render(data);
+    } else {
+      view.hide();
+    }
+  });
+}
+
 function ensureViewForRoute(views, route) {
   const viewName = route.view;
 
@@ -84,6 +96,12 @@ function ensureViewForRoute(views, route) {
     }
 
     viewOptions.name = viewOptions.name || viewName;
+
+    if (viewOptions.static) {
+      _.defaults(viewOptions, implementation.config.staticViews);
+    } else {
+      _.defaults(viewOptions, implementation.config.views);
+    }
 
     views[viewName] = View(viewOptions);
   }

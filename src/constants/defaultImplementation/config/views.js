@@ -3,8 +3,7 @@
  */
 const viewConfig = {
 
-  defaultImplementation: 'handlebars',
-  templateBaseUrl: 'templates/'
+  adapter: 'riot'
 
 };
 

@@ -1,6 +1,10 @@
 /**
  * @author rik
  */
-const staticViewsConfig = {};
+const staticViewsConfig = {
+
+  adapter: 'riot'
+
+};
 
 export default staticViewsConfig;
