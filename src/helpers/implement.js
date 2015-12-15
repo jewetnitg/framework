@@ -1,4 +1,3 @@
-import Factory from '../helpers/Factory';
 import _ from 'lodash';
 
 // factories
@@ -8,6 +7,7 @@ import Translator from 'frontend-translator';
 import Router from 'frontend-router';
 
 import Service from '../factories/Service';
+import FactoryFactory from '../factories/Factory';
 
 // singletons
 import communicator from '../singletons/communicator';
@@ -22,73 +22,90 @@ import implementation from '../constants/implementation';
 function implement(options = {}) {
   return getOptionsFromServer(options)
     .then((serverData) => {
-      const opts = _.merge({}, defaultImplementation, options, serverData);
+      const factory = FactoryFactory({
+        defaults: defaultImplementation,
+        factories: [
+          // expose values as passed in
+          ['config', function (config) {
+            implementation.config = config;
+          }],
+          ['api', function (api) {
+            implementation.api = api;
+          }],
+          // set up translator
+          ['config.app.defaultLocale', 'config.locales', function (defaultLocale, locales) {
+            implementation.translator = Translator({
+              defaultLocale,
+              locales
+            });
+          }],
+          // set up communicator adapters
+          ['components.adapters', function (adapters) {
+            _.each(adapters, (adapter, adapterName) => {
+              adapter.name = adapter.name || adapterName;
+              implementation.components[adapter.name] = communicator.Adapter(adapter);
+            });
+          }],
+          // set up communicator connections
+          ['config.connections', 'api.connections', function (connectionsConfig, connectionsApi) {
+            mergeImplementations(connectionsApi, connectionsConfig);
+            _.each(connectionsConfig, (connection, connectionName) => {
+              connection.name = connection.name || connectionName;
+              implementation.config.connections[connection.name] = communicator.Connection(connection);
+            });
+          }],
+          // set up communicator requests
+          ['api.policies', 'api.requests', function (policies, requests) {
+            communicator.policyExecutor.add(policies);
+            _.each(requests, (request, requestName) => {
+              request.name = request.name || requestName;
+              implementation.api.requests[request.name] = communicator.Request(request);
+            });
+          }],
+          // set up models
+          ['api.models', 'config.models.defaultConnection', 'config.app.defaultConnection', function (models, modelDefaultConnection, appDefaultConnection) {
+            const defaultConnection = modelDefaultConnection || appDefaultConnection;
+            _.each(models, (model, modelName) => {
+              model.name = model.name || modelName;
+              model.connection = model.connection || defaultConnection;
+              implementation.api.models[model.name] = Model(model);
+            });
+          }],
+          // set up services
+          ['api.services', function (services) {
+            _.each(services, (service, serviceName) => {
+              service.name = service.name || serviceName;
+              implementation.api.services[service.name] = Service(service);
+            });
+          }],
+          // set up router
+          ['config.router', 'config.routes', 'api.routes', 'libraries.riot', 'api.middleware', 'api.views', 'api.staticViews', 'config.views', 'config.staticViews', function (routerConfig, routesConfig, routesApi, riot, middleware, views, staticViews, viewConfig, staticViewConfig) {
+            mergeImplementations(routesApi, routesConfig, 'route');
+            routerConfig.routes = routesConfig;
+            routerConfig.middleware = middleware;
+            routerConfig.views = views;
+            routerConfig.staticViews = staticViews;
+            routerConfig.staticViewConfig = staticViewConfig;
+            routerConfig.viewConfig = viewConfig;
 
-      applyDevice(opts);
-      applyEnv(opts);
+            if (riot) {
+              Router.View.adapters.riot.riot = riot;
+            }
 
-      if (opts.libraries.riot) {
-        View.adapters.riot.riot = opts.libraries.riot;
-        Router.View.adapters.riot.riot = opts.libraries.riot;
-      }
-
-      mergeImplementations(opts.api.routes, opts.config.routes, 'route');
-      delete opts.api.routes;
-
-      mergeImplementations(opts.api.connections, opts.config.connections);
-      delete opts.api.connections;
-
-      implementation.config = opts.config;
-
-      // views dont have to be constructed at once, they are constructed when needed
-      implementation.api.views = opts.api.views;
-      implementation.api.middleware = opts.api.middleware;
-      implementation.api.staticViews = opts.api.staticViews;
-      implementation.translator = Translator({
-        defaultLocale: opts.config.app.defaultLocale,
-        locales: opts.config.locales
+            implementation.router = new Router(routerConfig);
+          }]
+        ]
       });
 
+      _.merge(options, serverData);
+
+      applyDevice(options);
+      applyEnv(options);
+
+      factory(options);
+
       communicator.defaultConnection = implementation.config.app.defaultConnection;
-      communicator.policyExecutor.add(opts.api.policies);
       implementation.communicator = communicator;
-
-      // factories for all components of the implementation
-      const factories = [
-        // frontend-communicator
-        {
-          factory: communicator.Adapter,
-          src: opts.components.adapters,
-          dst: implementation.components.adapters
-        },
-        {
-          factory: communicator.Connection,
-          src: opts.config.connections,
-          dst: implementation.config.connections
-        },
-        {
-          factory: communicator.Request,
-          src: opts.api.requests,
-          dst: implementation.api.requests
-        },
-        // frontend-model
-        {
-          factory: Model,
-          src: opts.api.models,
-          dst: implementation.api.models,
-          defaults: {
-            connection: implementation.config.models.connection || implementation.config.app.defaultConnection
-          }
-        },
-        // frntnd-framework
-        {
-          factory: Service,
-          src: opts.api.services,
-          dst: implementation.api.services
-        }
-      ];
-
-      _.each(factories, Factory);
 
       return implementation;
     });

@@ -131,18 +131,7 @@ function startApplication(app, options) {
       return app.config.bootstrap();
     })
     .then(() => {
-      const routerOptions = _.merge({}, app.config.router, {
-        viewConfig: app.config.views,
-        staticViewConfig: app.config.views,
-        views: app.api.views,
-        staticViews: app.api.staticViews,
-        routes: app.config.routes,
-        middleware: app.api.middleware
-      });
-
-      app.router = implementation.router = Router(routerOptions);
       app.trigger('ready');
-
       // for render-server
       if (window._onAppReady) {
         window._onAppReady();

@@ -11,7 +11,7 @@
 const implementation = {
   api: {
     models: {},
-    controllers: {},
+    middleware: {},
     views: {},
     requests: {},
     services: {}
