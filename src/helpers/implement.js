@@ -5,10 +5,9 @@ import _ from 'lodash';
 import Model from 'frontend-model';
 import View from 'frontend-view';
 import Translator from 'frontend-translator';
+import Router from 'frontend-router';
 
-import Controller from '../factories/Controller';
 import Service from '../factories/Service';
-import Router from '../factories/Router';
 
 // singletons
 import communicator from '../singletons/communicator';
@@ -30,6 +29,7 @@ function implement(options = {}) {
 
       if (opts.libraries.riot) {
         View.adapters.riot.riot = opts.libraries.riot;
+        Router.View.adapters.riot.riot = opts.libraries.riot;
       }
 
       mergeImplementations(opts.api.routes, opts.config.routes, 'route');
@@ -42,7 +42,8 @@ function implement(options = {}) {
 
       // views dont have to be constructed at once, they are constructed when needed
       implementation.api.views = opts.api.views;
-      implementation.api.staticViews = View.staticViews;
+      implementation.api.middleware = opts.api.middleware;
+      implementation.api.staticViews = opts.api.staticViews;
       implementation.translator = Translator({
         defaultLocale: opts.config.app.defaultLocale,
         locales: opts.config.locales
@@ -77,22 +78,6 @@ function implement(options = {}) {
           dst: implementation.api.models,
           defaults: {
             connection: implementation.config.models.connection || implementation.config.app.defaultConnection
-          }
-        },
-        // frontend-router
-        {
-          factory: Controller,
-          src: opts.api.controllers,
-          dst: implementation.api.controllers
-        },
-        // frontend-view
-        {
-          factory: View,
-          src: opts.api.staticViews,
-          dst: {},
-          defaults: opts.config.staticViews,
-          override: {
-            static: true
           }
         },
         // frntnd-framework

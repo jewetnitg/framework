@@ -2,7 +2,7 @@ import _ from 'lodash';
 import events from 'events';
 
 import View from 'frontend-view';
-import Router from './Router';
+import Router from 'frontend-router';
 
 import session from '../constants/session';
 import eventsMixin from '../mixins/eventsMixin';
@@ -38,7 +38,6 @@ function Application(options = {}) {
 }
 
 Application.prototype = {
-
 
   get models() {
     return this.api && this.api.models;
@@ -95,8 +94,6 @@ Application.prototype = {
    * @memberof Application
    * @instance
    *
-   * @todo implement
-   *
    * @param wordPath {String} Path to the word, 'general.yes' for example
    * @param data {Object} Object to fill the translation with
    *
@@ -112,8 +109,6 @@ Application.prototype = {
    * @method setLocale
    * @memberof Application
    * @instance
-   *
-   * @todo implement
    *
    * @param {String} [locale=defaultLocale specified in config/app.js] - The locale to set
    *
@@ -136,9 +131,19 @@ function startApplication(app, options) {
       return app.config.bootstrap();
     })
     .then(() => {
-      app.router = implementation.router = Router(app.options);
+      const routerOptions = _.merge({}, app.config.router, {
+        viewConfig: app.config.views,
+        staticViewConfig: app.config.views,
+        views: app.api.views,
+        staticViews: app.api.staticViews,
+        routes: app.config.routes,
+        middleware: app.api.middleware
+      });
+
+      app.router = implementation.router = Router(routerOptions);
       app.trigger('ready');
 
+      // for render-server
       if (window._onAppReady) {
         window._onAppReady();
         delete window._onAppReady;
