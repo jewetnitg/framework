@@ -19,6 +19,7 @@ import isMobile from '../constants/isMobile';
 import defaultImplementation from '../constants/defaultImplementation/index';
 import implementation from '../constants/implementation';
 
+// @todo implement view adapters
 function implement(options = {}, dst = {}) {
   return getOptionsFromServer(options)
     .then((serverData) => {
@@ -40,10 +41,10 @@ function implement(options = {}, dst = {}) {
             });
           }],
           // set up communicator adapters
-          ['components.adapters', function (adapters) {
+          ['adapters.communicator', function (adapters) {
             _.each(adapters, (adapter, adapterName) => {
               adapter.name = adapter.name || adapterName;
-              implementation.components[adapter.name] = communicator.Adapter(adapter);
+              implementation.adapters.communicator[adapter.name] = communicator.Adapter(adapter);
             });
           }],
           // set up communicator connections
@@ -55,8 +56,8 @@ function implement(options = {}, dst = {}) {
             });
           }],
           // set up communicator requests
-          ['api.policies', 'api.requests', function (policies, requests) {
-            communicator.policyExecutor.add(policies);
+          ['api.middleware.security', 'api.requests', function (securityMiddleware, requests) {
+            communicator.middlewareRunner.security.add(securityMiddleware);
             _.each(requests, (request, requestName) => {
               request.name = request.name || requestName;
               implementation.api.requests[request.name] = communicator.Request(request);
@@ -79,7 +80,7 @@ function implement(options = {}, dst = {}) {
             });
           }],
           // set up router
-          ['config.router', 'config.routes', 'api.routes', 'libraries.riot', 'api.middleware', 'api.views', 'api.staticViews', 'config.views', 'config.staticViews', function (routerConfig, routesConfig, routesApi, riot, middleware, views, staticViews, viewConfig, staticViewConfig) {
+          ['config.router', 'config.routes', 'api.routes', 'libraries.riot', 'libraries.react', 'libraries.react-dom', 'api.middleware', 'api.views', 'api.staticViews', 'config.views', 'config.staticViews', 'adapters.view', function (routerConfig, routesConfig, routesApi, riot, React, ReactDOM, middleware, views, staticViews, viewConfig, staticViewConfig, adapters) {
             mergeImplementations(routesApi, routesConfig, 'route');
             routerConfig.routes = routesConfig;
             routerConfig.middleware = middleware;
@@ -91,6 +92,21 @@ function implement(options = {}, dst = {}) {
             if (riot) {
               Router.View.adapters.riot.riot = riot;
             }
+
+            if (React) {
+              //noinspection JSPrimitiveTypeWrapperUsage
+              Router.View.adapters.react.React = React;
+            }
+
+            if (ReactDOM) {
+              //noinspection JSPrimitiveTypeWrapperUsage
+              Router.View.adapters.react.ReactDOM = ReactDOM;
+            }
+
+            _.each(adapters, (adapter, name) => {
+              adapter.name = adapter.name || name;
+              Router.View.Adapter(adapter);
+            });
 
             implementation.router = new Router(routerConfig);
           }]
