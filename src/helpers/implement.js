@@ -1,8 +1,8 @@
 import _ from 'lodash';
+import $ from 'jquery';
 
 // factories
 import Model from 'frontend-model';
-import View from 'frontend-view';
 import Translator from 'frontend-translator';
 import Router from 'frontend-router';
 
@@ -19,7 +19,7 @@ import isMobile from '../constants/isMobile';
 import defaultImplementation from '../constants/defaultImplementation/index';
 import implementation from '../constants/implementation';
 
-function implement(options = {}) {
+function implement(options = {}, dst = {}) {
   return getOptionsFromServer(options)
     .then((serverData) => {
       const factory = FactoryFactory({
@@ -106,6 +106,9 @@ function implement(options = {}) {
 
       communicator.defaultConnection = implementation.config.app.defaultConnection;
       implementation.communicator = communicator;
+
+      _.extend(dst, implementation);
+      dst.options = implementation;
 
       return implementation;
     });

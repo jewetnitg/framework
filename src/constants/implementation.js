@@ -16,8 +16,9 @@ const implementation = {
     requests: {},
     services: {}
   },
-  components: {
-    adapters: {}
+  adapters: {
+    communicator: {},
+    view: {}
   },
   config: {
     app: {},

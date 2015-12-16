@@ -120,10 +120,8 @@ Application.prototype = {
 };
 
 function startApplication(app, options) {
-  return implement(options)
-    .then((options) => {
-      _.extend(app, options);
-      app.options = options;
+  return implement(options, app)
+    .then(() => {
       return app.connect();
     })
     .then((connection) => {
