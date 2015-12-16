@@ -56,7 +56,14 @@ function implement(options = {}, dst = {}) {
             });
           }],
           // set up communicator requests
-          ['api.middleware.security', 'api.requests', function (securityMiddleware, requests) {
+          ['api.middleware.security', 'api.requests', 'libraries.sails.io', 'libraries.socket.io-client', function (securityMiddleware, requests, sailsIoClient, socketIoClient) {
+            if (sailsIoClient) {
+              communicator.adapters.SAILS_IO.sailsIoClient = sailsIoClient;
+            }
+
+            if (socketIoClient) {
+              communicator.adapters.SAILS_IO.socketIoClient = socketIoClient;
+            }
             communicator.middlewareRunner.security.add(securityMiddleware);
             _.each(requests, (request, requestName) => {
               request.name = request.name || requestName;
