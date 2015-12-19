@@ -1,6 +1,6 @@
 {
-  "name": "laevis",
-  "version": "0.0.1",
+  "name": "frntnd-framework",
+  "version": "0.0.5",
   "description": "frontend-framework is a framework built on top of browserify.",
   "main": "index.js",
   "scripts": {
