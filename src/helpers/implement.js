@@ -14,6 +14,7 @@ import communicator from '../singletons/communicator';
 
 //helpers
 import isMobile from '../constants/isMobile';
+import session from '../constants/session';
 
 // constants
 import defaultImplementation from '../constants/defaultImplementation/index';
@@ -87,14 +88,20 @@ function implement(options = {}, dst = {}) {
             });
           }],
           // set up router
+          // @todo refactor arguments
           ['config.router', 'config.routes', 'api.routes', 'libraries.riot', 'libraries.react', 'libraries.react-dom', 'api.middleware', 'api.views', 'api.staticViews', 'config.views', 'config.staticViews', 'adapters.view', function (routerConfig, routesConfig, routesApi, riot, React, ReactDOM, middleware, views, staticViews, viewConfig, staticViewConfig, adapters) {
+
             mergeImplementations(routesApi, routesConfig, 'route');
-            routerConfig.routes = routesConfig;
-            routerConfig.middleware = middleware;
-            routerConfig.views = views;
-            routerConfig.staticViews = staticViews;
-            routerConfig.staticViewConfig = staticViewConfig;
-            routerConfig.viewConfig = viewConfig;
+
+            _.extend(routerConfig, {
+              routes: routesConfig,
+              staticViews,
+              staticViewConfig,
+              viewConfig,
+              views,
+              middleware,
+              session
+            });
 
             if (riot) {
               Router.View.adapters.riot.riot = riot;
