@@ -88,41 +88,22 @@ function implement(options = {}, dst = {}) {
             });
           }],
           // set up router
-          // @todo refactor arguments
-          ['config.router', 'config.routes', 'api.routes', 'libraries.riot', 'libraries.react', 'libraries.react-dom', 'api.middleware', 'api.views', 'api.staticViews', 'config.views', 'config.staticViews', 'adapters.view', function (routerConfig, routesConfig, routesApi, riot, React, ReactDOM, middleware, views, staticViews, viewConfig, staticViewConfig, adapters) {
+          ['config', 'api', 'libraries', 'adapters.view', function (config, api, libraries, adapters) {
+            mergeImplementations(api.routes, config.routes, 'route');
 
-            mergeImplementations(routesApi, routesConfig, 'route');
-
-            _.extend(routerConfig, {
-              routes: routesConfig,
-              staticViews,
-              staticViewConfig,
-              viewConfig,
-              views,
-              middleware,
+            _.extend(config.router, {
+              routes: config.routes,
+              views: api.views,
+              staticViews: api.staticViews,
+              middleware: api.middleware,
+              viewConfig: config.views,
+              staticViewConfig: config.staticViews,
+              libraries,
+              adapters,
               session
             });
 
-            if (riot) {
-              Router.View.adapters.riot.riot = riot;
-            }
-
-            if (React) {
-              //noinspection JSPrimitiveTypeWrapperUsage
-              Router.View.adapters.react.React = React;
-            }
-
-            if (ReactDOM) {
-              //noinspection JSPrimitiveTypeWrapperUsage
-              Router.View.adapters.react.ReactDOM = ReactDOM;
-            }
-
-            _.each(adapters, (adapter, name) => {
-              adapter.name = adapter.name || name;
-              Router.View.Adapter(adapter);
-            });
-
-            implementation.router = new Router(routerConfig);
+            implementation.router = new Router(config.router);
           }]
         ]
       });
