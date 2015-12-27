@@ -65,7 +65,7 @@ function implement(options = {}, dst = {}) {
             if (socketIoClient) {
               communicator.adapters.SAILS_IO.socketIoClient = socketIoClient;
             }
-            communicator.middlewareRunner.security.add(securityMiddleware);
+            communicator.middlewareRunner.add(securityMiddleware);
             _.each(requests, (request, requestName) => {
               request.name = request.name || requestName;
               implementation.api.requests[request.name] = communicator.Request(request);
