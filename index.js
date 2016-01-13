@@ -1,3 +1,5 @@
 import Application from './src/factories/Application';
 
-export default Application;
+const app = Application();
+
+export default app;

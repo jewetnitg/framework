@@ -1,15 +1,9 @@
 import _ from 'lodash';
-import events from 'events';
-
-import View from 'frontend-view';
-import Router from 'frontend-router';
 
 import session from '../constants/session';
 import eventsMixin from '../mixins/eventsMixin';
 
 import implement from '../helpers/implement';
-
-import implementation from '../constants/implementation';
 
 /**
  * @class Application
@@ -21,27 +15,46 @@ import implementation from '../constants/implementation';
  * @property config {Object} Object containing the configuration objects
  * @property env {String} String representing the runtime environment
  */
-function Application(options = {}) {
+function Application() {
   const props = {
     session: {
       value: session
     }
   };
 
-  const app = window.app = Object.create(Application.prototype, props);
+  const app = Object.create(Application.prototype, props);
 
-  _.extend(app, eventsMixin());
-
-  startApplication(app, options);
+  Object.assign(app, eventsMixin(), {
+    started: false
+  });
 
   return app;
 }
 
+//noinspection JSUnresolvedVariable
 Application.prototype = {
 
-  get models() {
-    return this.api && this.api.models;
+  start(options = {}) {
+    if (this.started) {
+      return Promise.resolve();
+    }
+
+    return implement(options)
+      .then((constructed) => {
+        Object.assign(this, constructed);
+        return this.serverInstance.connect();
+      })
+      .then(() => {
+        //noinspection JSUnresolvedFunction
+        return this.config.bootstrap();
+      })
+      .then(() => {
+        this.router.start();
+
+        this.trigger('ready');
+      });
   },
+
   /**
    * The server property of the default connection. Please refer to the frontend-communicator module for more information.
    *
@@ -52,39 +65,13 @@ Application.prototype = {
    * @type Object|undefined
    */
   get server() {
-    return (this.connection && this.connection.server) || (this.communicator.servers[this.config.app.defaultConnection]);
+    //noinspection JSUnresolvedVariable
+    return this.serverInstance.server;
   },
 
-  /**
-   * Connects a Connection using the frontend-communicator module.
-   * Please refer to the frontend-communicator module to read more on this.
-   *
-   * @method connect
-   * @memberof Application
-   * @instance
-   *
-   * @param {String} [connection=defaultConnection specified in config/app.js] - The name of the Connection to connect
-   *
-   * @returns {Promise<Object>} A promise that resolves with a frontend-communicator Connection instance with the provided name
-   */
-  connect(connection = this.config.app.defaultConnection) {
-    return this.communicator.connect(connection);
-  },
-
-  /**
-   * Executes one or more policies, see the frontend-policies documentation for more info.
-   *
-   * @method policy
-   * @memberof Application
-   * @instance
-   *
-   * @param policies {String|Array<String>} The policies to execute
-   * @param {Object} [data={}] - Data/params for the policy 'request'
-   *
-   * @returns {Promise} A promise that resolves if all policies pass and rejects if one or more don't
-   */
-  policy(policies = [], data = {}) {
-    return this.router.policy(policies, data);
+  get serverInstance() {
+    //noinspection JSUnresolvedVariable
+    return this.servers[this.config.app.defaultServer];
   },
 
   /**
@@ -100,6 +87,7 @@ Application.prototype = {
    * @returns {String} The translation filled with data
    */
   translate(wordPath, data = {}) {
+    //noinspection JSUnresolvedVariable
     return this.translator.translate(wordPath, data);
   },
 
@@ -110,32 +98,15 @@ Application.prototype = {
    * @memberof Application
    * @instance
    *
-   * @param {String} [locale=defaultLocale specified in config/app.js] - The locale to set
+   * @param {String} [locale=defaultLocale specified in config/state.js] - The locale to set
    *
    */
+
   setLocale(locale = this.config.app.defaultLocale) {
+    //noinspection JSUnresolvedVariable
     return this.translator.setLocale(locale);
   }
 
 };
-
-function startApplication(app, options) {
-  return implement(options, app)
-    .then(() => {
-      return app.connect();
-    })
-    .then((connection) => {
-      app.connection = connection;
-      return app.config.bootstrap();
-    })
-    .then(() => {
-      app.trigger('ready');
-      // for render-server
-      if (window._onAppReady) {
-        window._onAppReady();
-        delete window._onAppReady;
-      }
-    });
-}
 
 export default Application;
